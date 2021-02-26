@@ -17,9 +17,9 @@ namespace Business.Constants
         public static string InvalidCar = "Geçersiz araç";
         public static string InvalidCustomer = "Geçersiz müşteri";
         public static string RentedCar = "Seçilen araç şuan kirada";
-        public static string InavlidEmail = "Geçersiz mail adresi";
-        public static string InavlidPassword = "Parola en az 8 karakter olmalıdır";
-        public static string InavlidUser = "Geçersiz kullanıcı";
-        public static string InavlidCompanyName = "Şirket ismi en az 5 karakter olmalıdır";
+        public static string InvalidEmail = "Geçersiz mail adresi";
+        public static string InvalidPassword = "Parola en az 8 karakter olmalıdır";
+        public static string InvalidUser = "Geçersiz kullanıcı";
+        public static string InvalidCompanyName = "Şirket ismi en az 5 karakter olmalıdır";
     }
 }

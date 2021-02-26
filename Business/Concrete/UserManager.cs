@@ -4,6 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Business.Abstract;
 using Business.Constants;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Validation;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
@@ -19,24 +21,9 @@ namespace Business.Concrete
             _userDal = userDal;
         }
 
+        [ValidationAspect(typeof(UserValidator))]
         public IResult Add(User user)
         {
-            if (user.FirstName.Length < 2)
-            {
-                return new ErrorResult(Messages.NameMin);
-            }
-            else if (user.LastName.Length <2)
-            {
-                return new ErrorResult(Messages.NameMin);
-            }
-            else if (user.Email.Contains("@") == false || user.Email.Length < 5)
-            {
-                return new ErrorResult(Messages.InavlidEmail);
-            }
-            else if (user.Password.Length < 8)
-            {
-                return new ErrorResult(Messages.InavlidPassword);
-            }
             _userDal.Add(user);
             return new SuccessResult(Messages.DataAdded);
         }
@@ -57,11 +44,11 @@ namespace Business.Concrete
             }
             else if (user.Email.Contains("@") == false || user.Email.Length < 5)
             {
-                return new ErrorResult(Messages.InavlidEmail);
+                return new ErrorResult(Messages.InvalidEmail);
             }
             else if (user.Password.Length < 8)
             {
-                return new ErrorResult(Messages.InavlidPassword);
+                return new ErrorResult(Messages.InvalidPassword);
             }
             _userDal.Update(user);
             return new SuccessResult(Messages.DataUpdated);
