@@ -28,28 +28,9 @@ namespace Business.Concrete
             return new SuccessResult(Messages.DataAdded);
         }
 
+        [ValidationAspect(typeof(UserValidator))]
         public IResult Update(User user)
         {
-            if (_userDal.Get(u=>u.UserId == user.UserId) == null)
-            {
-                return new ErrorResult(Messages.NotFoundResult);
-            }
-            else if (user.FirstName.Length < 2)
-            {
-                return new ErrorResult(Messages.NameMin);
-            }
-            else if (user.LastName.Length < 2)
-            {
-                return new ErrorResult(Messages.NameMin);
-            }
-            else if (user.Email.Contains("@") == false || user.Email.Length < 5)
-            {
-                return new ErrorResult(Messages.InvalidEmail);
-            }
-            else if (user.Password.Length < 8)
-            {
-                return new ErrorResult(Messages.InvalidPassword);
-            }
             _userDal.Update(user);
             return new SuccessResult(Messages.DataUpdated);
         }

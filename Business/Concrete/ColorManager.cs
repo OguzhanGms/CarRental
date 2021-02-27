@@ -28,22 +28,15 @@ namespace Business.Concrete
             return new SuccessResult(Messages.DataAdded);
         }
 
+        [ValidationAspect(typeof(ColorValidator))]
         public IResult Update(CarColor color)
         {
-            if (color.ColorName.Length < 2)
-            {
-                return new ErrorResult(Messages.NameMin);
-            }
             _colorDal.Update(color);
             return new SuccessResult(Messages.DataUpdated);
         }
 
         public IResult Delete(CarColor color)
         {
-            if (color.ColorName.Length < 2)
-            {
-                return new ErrorResult(Messages.NameMin);
-            }
             _colorDal.Delete(color);
             return new SuccessResult(Messages.DataDeleted);
         }

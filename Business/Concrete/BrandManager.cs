@@ -25,15 +25,12 @@ namespace Business.Concrete
             return new SuccessResult(Messages.DataAdded);
         }
 
+        [ValidationAspect(typeof(BrandValidator))]
         public IResult Update(Brand brand)
         {
             if (_brandDal.Get(b => b.BrandId == brand.BrandId) == null)
             {
                 return new ErrorResult(Messages.NotFoundResult);
-            }
-            else if (brand.BrandName.Length < 2)
-            {
-                return new ErrorResult(Messages.NameMin);
             }
             _brandDal.Update(brand);
             return new SuccessResult(Messages.DataAdded);

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
+using Core.Utilities.Business;
 
 namespace Business.Concrete
 {
@@ -24,14 +25,12 @@ namespace Business.Concrete
         [ValidationAspect(typeof(RentalValidator))]
         public IResult Add(Rental rental)
         {
-            if (_rentalDal.Get(r => r.CarId == rental.CarId && r.ReturnDate == null) != null)
-            {
-                return new ErrorResult(Messages.RentedCar);
-            }
+            BusinessRules.Run(CheckNullReturnDate(rental.CarId));
             _rentalDal.Add(rental);
             return new SuccessResult(Messages.DataAdded);
         }
 
+        [ValidationAspect(typeof(RentalValidator))]
         public IResult Update(Rental rental)
         {
             _rentalDal.Update(rental);
@@ -40,20 +39,14 @@ namespace Business.Concrete
 
         public IResult Delete(Rental rental)
         {
-            if (_rentalDal.Get(r => r.RentalId == rental.RentalId) == null)
-            {
-                return new ErrorResult(Messages.NotFoundResult);
-            }
+            BusinessRules.Run(CheckIfRentalIdExists(rental.RentalId));
             _rentalDal.Delete(rental);
             return new SuccessResult(Messages.DataDeleted);
         }
 
         public IDataResult<Rental> Get(int rentalId)
         {
-            if (_rentalDal.Get(r => r.RentalId == rentalId) == null)
-            {
-                return new ErrorDataResult<Rental>(Messages.NotFoundResult);
-            }
+            BusinessRules.Run(CheckIfRentalIdExists(rentalId));
             return new SuccessDataResult<Rental>(_rentalDal.Get(r=>r.RentalId == rentalId), Messages.DataDeleted);
         }
 
@@ -77,10 +70,7 @@ namespace Business.Concrete
 
         public IDataResult<RentalDetailDto> GetDetail(int rentalId)
         {
-            if (_rentalDal.GetDetail(rentalId) == null)
-            {
-                return new ErrorDataResult<RentalDetailDto>(Messages.NotFoundResult);
-            }
+            BusinessRules.Run(CheckIfRentalIdExists(rentalId));
             return new SuccessDataResult<RentalDetailDto>(_rentalDal.GetDetail(rentalId), Messages.DatasListed);
         }
 
@@ -118,6 +108,26 @@ namespace Business.Concrete
                 return new ErrorDataResult<List<RentalDetailDto>>(Messages.NotFoundResult);
             }
             return new SuccessDataResult<List<RentalDetailDto>>(_rentalDal.GetRentalsDetail(r => r.ReturnDate == null), Messages.DatasListed);
+        }
+
+        public IResult CheckNullReturnDate(int carId)
+        {
+            if (_rentalDal.GetAll(r => r.CarId == carId && r.ReturnDate == null).Any())
+            {
+                return new ErrorResult(Messages.RentedCar);
+            }
+
+            return new SuccessResult();
+        }
+
+        public IResult CheckIfRentalIdExists(int rentalId)
+        {
+            if (_rentalDal.Get(r => r.RentalId == rentalId) == null)
+            {
+                return new ErrorResult(Messages.NotFoundResult);
+            }
+
+            return new SuccessResult();
         }
     }
 }

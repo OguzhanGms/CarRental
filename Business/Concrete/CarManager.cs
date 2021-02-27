@@ -87,21 +87,13 @@ namespace Business.Concrete
             _carDal.Add(car);
             return new SuccessResult(Messages.DataAdded);
         }
-
-
+        
+        [ValidationAspect(typeof(CarValidator))]
         public IResult Update(Car car)
         {
             if (_carDal.Get(c=>c.CarId == car.CarId) == null)
             {
                 return new ErrorResult(Messages.NotFoundResult);
-            }
-            else if (car.CarName.Length < 2)
-            {
-                return new ErrorResult(Messages.NameMin);
-            }
-            else if (car.DailyPrice < 0)
-            {
-                return new ErrorResult(Messages.CarDailyPriceMin);
             }
 
             _carDal.Update(car);

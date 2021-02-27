@@ -27,12 +27,9 @@ namespace Business.Concrete
             return new SuccessResult(Messages.DataAdded);
         }
 
+        [ValidationAspect(typeof(CustomerValidator))]
         public IResult Update(Customer customer)
         {
-            if (customer.CompanyName.Length < 5)
-            {
-                return new ErrorResult(Messages.InvalidCompanyName);
-            }
             _customerDal.Update(customer);
             return new SuccessResult(Messages.DataUpdated);
         }
