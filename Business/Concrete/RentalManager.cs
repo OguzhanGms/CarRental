@@ -25,7 +25,11 @@ namespace Business.Concrete
         [ValidationAspect(typeof(RentalValidator))]
         public IResult Add(Rental rental)
         {
-            BusinessRules.Run(CheckNullReturnDate(rental.CarId));
+            IResult result = BusinessRules.Run(CheckNullReturnDate(rental.CarId));
+            if (result != null)
+            {
+                return result;
+            }
             _rentalDal.Add(rental);
             return new SuccessResult(Messages.DataAdded);
         }
@@ -39,14 +43,22 @@ namespace Business.Concrete
 
         public IResult Delete(Rental rental)
         {
-            BusinessRules.Run(CheckIfRentalIdExists(rental.RentalId));
+            IResult result = BusinessRules.Run(CheckIfRentalIdExists(rental.RentalId));
+            if (result != null)
+            {
+                return result;
+            }
             _rentalDal.Delete(rental);
             return new SuccessResult(Messages.DataDeleted);
         }
 
         public IDataResult<Rental> Get(int rentalId)
         {
-            BusinessRules.Run(CheckIfRentalIdExists(rentalId));
+            IResult result = BusinessRules.Run(CheckIfRentalIdExists(rentalId));
+            if (result != null)
+            {
+                return new ErrorDataResult<Rental>(result.Message);
+            }
             return new SuccessDataResult<Rental>(_rentalDal.Get(r=>r.RentalId == rentalId), Messages.DataDeleted);
         }
 
@@ -70,7 +82,11 @@ namespace Business.Concrete
 
         public IDataResult<RentalDetailDto> GetDetail(int rentalId)
         {
-            BusinessRules.Run(CheckIfRentalIdExists(rentalId));
+            IResult result = BusinessRules.Run(CheckIfRentalIdExists(rentalId));
+            if (result != null)
+            {
+                return new ErrorDataResult<RentalDetailDto>(result.Message);
+            }
             return new SuccessDataResult<RentalDetailDto>(_rentalDal.GetDetail(rentalId), Messages.DatasListed);
         }
 
