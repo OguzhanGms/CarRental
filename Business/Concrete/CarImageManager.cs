@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Business.Constants;
+using Business.ValidationRules.FluentValidation;
+using Core.Aspects.Autofac.Validation;
 using Core.Utilities.Business;
 using Rental = Entities.Concrete.Rental;
 
@@ -21,6 +23,7 @@ namespace Business.Concrete
             _carImageDal = carImageDal;
         }
 
+        [ValidationAspect(typeof(CarImageValidator))]
         public IResult Add(CarImage carImage)
         {
             var result = BusinessRules.Run(CheckIfImageLimitExceeded(carImage.CarId), CheckIfCarImageUploaded(carImage));
@@ -33,6 +36,7 @@ namespace Business.Concrete
             return new SuccessResult();
         }
 
+        [ValidationAspect(typeof(CarImageValidator))]
         public IResult Update(CarImage carImage)
         {
             var result = BusinessRules.Run(CheckIfCarImageUpdated(carImage));
@@ -69,7 +73,17 @@ namespace Business.Concrete
 
         public IDataResult<List<CarImage>> GetImagesByCarId(int carId)
         {
-            return new SuccessDataResult<List<CarImage>>(CheckIfCarImageNull(carId));
+            var result = BusinessRules.Run(CheckIfCarImageNull(carId));
+
+            if (result != null)
+            {
+                return new ErrorDataResult<List<CarImage>>(new List<CarImage>{ new CarImage
+                {
+                    CarId = carId,
+                    ImagePath = FilePaths.DefaultCarImagePath
+                }});
+            }
+            return new SuccessDataResult<List<CarImage>>(_carImageDal.GetAll(c=>c.CarId == carId));
         }
 
         private IResult CheckIfImageLimitExceeded(int carId)
@@ -83,22 +97,14 @@ namespace Business.Concrete
             return new SuccessResult();
         }
 
-        private List<CarImage> CheckIfCarImageNull(int carId)
+        private IResult CheckIfCarImageNull(int carId)
         {
             var result = _carImageDal.GetAll(c => c.CarId == carId);
             if (!result.Any())
             {
-                return new List<CarImage>(new
-                    List<CarImage>
-                    {
-                        new CarImage
-                        {
-                            CarId = carId,
-                            ImagePath = FilePaths.DefaultCarImagePath
-                        }
-                    });
+                return new ErrorResult();
             }
-            return result;
+            return new SuccessResult();
         }
 
         private IResult CheckIfCarImageUploaded(CarImage carImage)
@@ -116,7 +122,10 @@ namespace Business.Concrete
 
         private IResult CheckIfCarImageUpdated(CarImage carImage)
         {
-            var result = FileHelper.CarImageUpdate(carImage.ImagePath, carImage.FromFile).Result;
+
+            var result = _carImageDal.GetAll(c=>c.CarImageId == carImage.CarImageId && c.ImagePath.Contains(carImage.ImagePath)).Any() 
+                ? FileHelper.CarImageUpdate(carImage.ImagePath, carImage.FromFile).Result
+                : new ErrorDataResult<string>(message: "Yanlış resim seçtiniz");
             if (!result.Success)
             {
                 return new ErrorResult(result.Message);
@@ -129,11 +138,24 @@ namespace Business.Concrete
 
         private IResult CheckIfCarImageDeleted(CarImage carImage)
         {
-            var result = FileHelper.CarImageDelete(carImage.ImagePath).Result;
+            var result = _carImageDal.GetAll(c => c.CarImageId == carImage.CarImageId && c.ImagePath.Contains(carImage.ImagePath)).Any()
+                ? FileHelper.CarImageUpdate(carImage.ImagePath, carImage.FromFile).Result
+                : new ErrorDataResult<string>(message: "Yanlış resim seçtiniz");
             if (!result.Success)
             {
                 return new ErrorResult(result.Message);
             }
+            return new SuccessResult();
+        }
+
+        private IResult CheckIfCarIdExists(int carId)
+        {
+            var isExists = _carImageDal.GetAll(c => c.CarId == carId).Any();
+            if (!isExists)
+            {
+                return new ErrorResult(Messages.InvalidCar);
+            }
+
             return new SuccessResult();
         }
     }

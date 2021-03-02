@@ -22,5 +22,6 @@ namespace Business.Constants
         public static string InvalidUser = "Geçersiz kullanıcı";
         public static string InvalidCompanyName = "Şirket ismi en az 5 karakter olmalıdır";
         public static string CarImageLimitExceeded = "En fazla 5 resim yükleyebilirsiniz";
+        public static string InvalidImageFile = "Lütfen bir resim dosyası seçin";
     }
 }

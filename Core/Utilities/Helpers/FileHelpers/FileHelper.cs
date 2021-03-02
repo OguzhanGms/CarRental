@@ -13,6 +13,7 @@ namespace Core.Utilities.Helpers.FileHelpers
     {
         public static async Task<IDataResult<string>> CarImageUpload(IFormFile formFile)
         {
+            if(formFile == null)  return new ErrorDataResult<string>(message: "Lütfen bir dosya seçin");
             var getExtension = Path.GetExtension(formFile.FileName).ToLower();
             var isImage = IsImage(getExtension);
             if (isImage.Result.Success)
@@ -26,17 +27,17 @@ namespace Core.Utilities.Helpers.FileHelpers
                     await formFile.CopyToAsync(fileStream);
                 }
 
-                string imagePathAndName = FilePaths.CarImagesPath + "\\" + imageName;
+                // string imagePathAndName = FilePaths.CarImagesPath + "\\" + imageName;
 
-                return new SuccessDataResult<string>(data: imagePathAndName);
+                return new SuccessDataResult<string>(data: imageName);
             }
 
-            return new ErrorDataResult<string>("Seçtiğiniz dosya resim uzantılı değil");
+            return new ErrorDataResult<string>("Lütfen bir dosya seçin");
         }
 
-        public static async Task<IDataResult<string>> CarImageUpdate(string filePath, IFormFile file)
+        public static async Task<IDataResult<string>> CarImageUpdate(string fileName, IFormFile file)
         {
-            var deleted = CarImageDelete(filePath).Result;
+            var deleted = CarImageDelete(fileName).Result;
             if (!deleted.Success)
             {
                 return new ErrorDataResult<string>(message: deleted.Message);
@@ -50,12 +51,14 @@ namespace Core.Utilities.Helpers.FileHelpers
             return new SuccessDataResult<string>(data:uploaded.Data);
         }
 
-        public static async Task<IResult> CarImageDelete(string filePath)
+        public static async Task<IResult> CarImageDelete(string fileName)
         {
-            var isExists = File.Exists(Directory.GetParent(Directory.GetCurrentDirectory()) + filePath);
+            var isExists = File.Exists(Directory.GetParent(Directory.GetCurrentDirectory()) 
+                                       + FilePaths.CarImagesPath + fileName);
             if (isExists)
             {
-                File.Delete(Directory.GetParent(Directory.GetCurrentDirectory()) + filePath);
+                File.Delete(Directory.GetParent(Directory.GetCurrentDirectory()) 
+                            + FilePaths.CarImagesPath + fileName);
                 return new SuccessResult();
             }
 
