@@ -1,12 +1,16 @@
-﻿using Business.Abstract;
+﻿using System;
+using Business.Abstract;
 using Business.Constants;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entities.Concrete;
 using Entities.DTOs;
 using System.Collections.Generic;
+using Business.BusinessAutofac.Autofac;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.Autofac.Validation;
+using Core.Aspects.Caching;
+using Core.Aspects.Transaction;
 
 namespace Business.Concrete
 {
@@ -81,6 +85,9 @@ namespace Business.Concrete
             return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarsDetail(), Messages.DatasListed);
         }
 
+
+        [SecuredOperation("car.add,admin")]
+        [CacheRemoveAspect("ICarService.Get")]
         [ValidationAspect(typeof(CarValidator))]
         public IResult Add(Car car)
         {
@@ -89,6 +96,7 @@ namespace Business.Concrete
         }
         
         [ValidationAspect(typeof(CarValidator))]
+        [CacheRemoveAspect("ICarService.Get")]
         public IResult Update(Car car)
         {
             if (_carDal.Get(c=>c.CarId == car.CarId) == null)
@@ -99,6 +107,7 @@ namespace Business.Concrete
             _carDal.Update(car);
             return new SuccessResult(Messages.DataUpdated);
         }
+        [CacheAspect()]
 
         public IResult Delete(Car car)
         {
@@ -109,6 +118,19 @@ namespace Business.Concrete
 
             _carDal.Delete(car);
             return new ErrorResult(Messages.DataDeleted);
+        }
+
+        [TransactionScopeAspect]
+        public IResult AddTransactionalTest(Car car)
+        {
+            Add(car);
+            if (car.DailyPrice < 50)
+            {
+                throw new Exception("");
+            }
+
+            Add(car);
+            return null;
         }
     }
 }

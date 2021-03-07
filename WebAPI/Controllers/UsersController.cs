@@ -1,12 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Business.Abstract;
+using Core.Entities.Concrete;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Business.Abstract;
-using DataAccess.Abstract;
-using Entities.Concrete;
 
 namespace WebAPI.Controllers
 {
@@ -20,7 +14,7 @@ namespace WebAPI.Controllers
         {
             _userService = userService;
         }
-        
+
         [HttpPost("add")]
         public IActionResult Add(User user)
         {
@@ -92,7 +86,7 @@ namespace WebAPI.Controllers
 
             return BadRequest(result);
         }
-        
+
         [HttpGet("gubylastname")]
         public IActionResult GetUsersByLastName(string lastName)
         {
@@ -104,7 +98,7 @@ namespace WebAPI.Controllers
 
             return BadRequest(result);
         }
-        
+
         [HttpGet("gubyemail")]
         public IActionResult GetUsersByEmail(string email)
         {

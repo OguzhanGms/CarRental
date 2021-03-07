@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Core.Entities.Concrete;
 using Core.Utilities.Results;
-using Entities.Concrete;
 
 namespace Business.Abstract
 {
@@ -16,5 +16,7 @@ namespace Business.Abstract
         IDataResult<List<User>> GetUsersByFirstName(string firstName);
         IDataResult<List<User>> GetUsersByLastName(string lastName);
         IDataResult<List<User>> GetUsersByEmail(string email);
+        List<OperationClaim> GetClaims(User user);
+        User GetByMail(string email);
     }
 }
